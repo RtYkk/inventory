@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.codelv.inventory"
+    namespace = "jlu.meng.inventory"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.codelv.inventory"
+        applicationId = "jlu.meng.inventory"
         minSdk = 24
         targetSdk = 34
         versionCode = 7

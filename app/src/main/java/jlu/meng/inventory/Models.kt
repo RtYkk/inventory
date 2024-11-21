@@ -1,4 +1,4 @@
-package com.codelv.inventory
+package jlu.meng.inventory
 
 import android.content.Context
 import android.util.Log
@@ -17,7 +17,6 @@ import java.io.OutputStream
 import java.io.InputStream
 import java.net.URLEncoder
 import java.util.*
-import java.util.concurrent.Callable
 import kotlin.math.max
 
 val USER_AGENTS = listOf(

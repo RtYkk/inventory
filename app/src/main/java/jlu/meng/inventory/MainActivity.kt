@@ -1,4 +1,4 @@
-package com.codelv.inventory
+package jlu.meng.inventory
 
 import android.content.Intent
 import android.net.Uri
@@ -46,15 +46,14 @@ import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
-import com.codelv.inventory.ui.theme.AppTheme
-import com.codelv.inventory.ui.theme.Colors
+import jlu.meng.inventory.ui.theme.AppTheme
+import jlu.meng.inventory.ui.theme.Colors
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.journeyapps.barcodescanner.ScanContract
 import kotlinx.coroutines.launch
-import java.util.*
 
 
 val TAG = "MainActivity";
@@ -119,13 +118,13 @@ fun ScansScreen(nav: NavHostController, state: AppViewModel) {
         topBar = {
             TopAppBar(
                 modifier = Modifier.shadow(20.dp),
-                title = { Text("Scanned Barcodes") },
+                title = { Text("扫描的条形码") },
                 navigationIcon =
                 {
                     IconButton(onClick = { nav.navigateUp() }) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = "返回"
                         )
                     }
                 }
@@ -154,7 +153,7 @@ fun ScansScreen(nav: NavHostController, state: AppViewModel) {
                     .fillMaxWidth()
                     .padding(8.dp),
             ) {
-                Text("Barcode content", fontWeight = FontWeight.Bold)
+                Text("条形码内容", fontWeight = FontWeight.Bold)
                 SelectionContainer {
                     Text(selectedScan.value, modifier = Modifier.padding(0.dp, 8.dp))
                 }
@@ -173,10 +172,10 @@ fun ScansScreen(nav: NavHostController, state: AppViewModel) {
                             }
                         }
                     ) {
-                        Text("Open part")
+                        Text("打开零件")
                     }
                 } else {
-                    Text("Unknown barcode format")
+                    Text("未知条形码格式")
                     if (selectedScan.value.trimmedLength() > 0) {
                         Button(
                             onClick = {
@@ -187,7 +186,7 @@ fun ScansScreen(nav: NavHostController, state: AppViewModel) {
                                 }
                             }
                         ) {
-                            Text("Import as MPN of new part")
+                            Text("作为新零件的 MPN 导入")
                         }
                     }
                 }
@@ -221,7 +220,7 @@ fun ScanList(scans: List<Scan>, onScanClicked: (scan: Scan) -> Unit) {
                         .height(32.dp)
                         .align(Alignment.CenterVertically),
                     imageVector = if (valid) Icons.Filled.Check else Icons.Filled.Close,
-                    contentDescription = "Scan valid",
+                    contentDescription = if (valid) "有效扫描" else "无效扫描",
                     tint = if (valid) Color.Green else Color.Red
                 )
                 Column(
@@ -239,7 +238,6 @@ fun ScanList(scans: List<Scan>, onScanClicked: (scan: Scan) -> Unit) {
             }
         }
     }
-
 }
 
 // Search parts in memory. Can use " and " to separate multiple filters
@@ -252,7 +250,7 @@ fun search(parts: List<Part>, query: String, ignoreCase: Boolean = true): List<P
     return parts.filter { part ->
         val desc = part.description.replace(
             "µ", "u"
-        ).replace("Ω", "Ohm").replace("ꭥ", "Ohm")
+        ).replace("Ω", "Ohm").replace("ꭥ", "Ohm")
         splitQuery.all {
             var q = it.trim()
             if (q.length == 0)
@@ -275,11 +273,6 @@ fun search(parts: List<Part>, query: String, ignoreCase: Boolean = true): List<P
             }
         }
     }
-//    return parts.filter{ part ->
-//        part.mpn.contains(q, ignoreCase)
-//                || part.manufacturer.contains(q, ignoreCase)
-//                || part.description.contains(q, ignoreCase)
-//    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
@@ -306,14 +299,14 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                     val existingPart = state.parts.find { it.mpn == part.mpn };
                     if (existingPart == null) {
                         state.addPart(part);
-                        snackbarState.showSnackbar(message = "Scanned new part ${part.mpn}")
+                        snackbarState.showSnackbar(message = "扫描到新零件 ${part.mpn}")
                         nav.navigate("edit-part?id=${part.id}")
                     } else {
-                        snackbarState.showSnackbar(message = "Opening part ${part.mpn}")
+                        snackbarState.showSnackbar(message = "打开零件 ${part.mpn}")
                         nav.navigate("edit-part?id=${existingPart.id}")
                     }
                 } else {
-                    snackbarState.showSnackbar(message = "Unknown barcode format")
+                    snackbarState.showSnackbar(message = "未知条形码格式")
                 }
             }
         }
@@ -326,11 +319,10 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
         if (mediaPath != null) {
             context.contentResolver.openOutputStream(mediaPath, "wt")?.use { stream ->
                 if (state.exportDb(stream) > 0) {
-                    Toast.makeText(context, "Export complete!", 3000).show()
+                    Toast.makeText(context, "导出完成！", 3000).show()
                 } else {
-                    Toast.makeText(context, "Export failed!", 3000).show()
+                    Toast.makeText(context, "导出失败！", 3000).show()
                 }
-
             }
         }
     }
@@ -342,16 +334,14 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
         if (mediaPath != null) {
             scope.launch {
                 context.contentResolver.openInputStream(mediaPath)?.use { stream ->
-
                     if (state.importDb(context, stream) > 0) {
                         state.reload()
-                        Toast.makeText(context, "Import complete!", 3000).show()
+                        Toast.makeText(context, "导入完成！", 3000).show()
                     } else {
-                        Toast.makeText(context, "Import failed!", 3000).show()
+                        Toast.makeText(context, "导入失败！", 3000).show()
                     }
-
                 }
-}
+            }
         }
     }
 
@@ -359,9 +349,12 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
         topBar = {
             TopAppBar(
                 modifier = Modifier.shadow(20.dp),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF5EB4FF) // Light blue color
+                ),
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Parts")
+                        Text("零件")
                         Text(
                             "${state.parts.size}",
                             fontSize = 12.sp,
@@ -377,7 +370,7 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                     IconButton(onClick = { expanded = true }) {
                         Icon(
                             imageVector = Icons.Filled.MoreVert,
-                            contentDescription = "More"
+                            contentDescription = "更多"
                         )
                     }
                     DropdownMenu(
@@ -385,17 +378,17 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                         onDismissRequest = { expanded = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Add part") },
+                            text = { Text("添加零件") },
                             onClick = { nav.navigate("edit-part") },
                             leadingIcon = {
                                 Icon(
                                     Icons.Filled.Add,
-                                    contentDescription = "Add part",
+                                    contentDescription = "添加零件",
                                 )
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Export database") },
+                            text = { Text("导出数据库") },
                             onClick = {
                                 expanded = false
                                 exportLauncher.launch("inventory.db")
@@ -403,12 +396,12 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                             leadingIcon = {
                                 Icon(
                                     Icons.Filled.FileUpload,
-                                    contentDescription = "Export",
+                                    contentDescription = "导出",
                                 )
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Import database") },
+                            text = { Text("导入数据库") },
                             onClick = {
                                 expanded = false
                                 importLauncher.launch(arrayOf("application/x-sqlite3","application/vnd.sqlite3", "application/octet-stream"))
@@ -416,7 +409,7 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                             leadingIcon = {
                                 Icon(
                                     Icons.Filled.FileDownload,
-                                    contentDescription = "Import",
+                                    contentDescription = "导入",
                                 )
                             }
                         )
@@ -437,7 +430,7 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                 ) {
                     Icon(
                         imageVector = Icons.Filled.List,
-                        contentDescription = "Go to scans"
+                        contentDescription = "查看扫描记录"
                     )
                 }
                 FloatingActionButton(
@@ -451,7 +444,7 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                     }) {
                     Icon(
                         imageVector = if (!showSearch) Icons.Filled.Search else Icons.Filled.SearchOff,
-                        contentDescription = "Search",
+                        contentDescription = "搜索",
                     )
                 }
                 FloatingActionButton(
@@ -460,22 +453,15 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                     onClick = {
                         if (!cameraPermissionState.status.isGranted) {
                             val textToShow = if (cameraPermissionState.status.shouldShowRationale) {
-                                // If the user has denied the permission but the rationale can be shown,
-                                // then gently explain why the app requires this permission
-                                "The camera is important for this app. Please grant the permission."
+                                "此应用需要相机权限才能扫描条形码，请授予权限。"
                             } else {
-                                // If it's the first time the user lands on this feature, or the user
-                                // doesn't want to be asked again for this permission, explain that the
-                                // permission is required
-                                "Camera permission required for this feature to be available. " +
-                                        "Please grant the permission"
+                                "需要相机权限才能使用此功能，请在设置中授予权限。"
                             }
                             scope.launch {
                                 var result = snackbarState.showSnackbar(
                                     message = textToShow,
-                                    actionLabel = "OK",
-
-                                    )
+                                    actionLabel = "确定",
+                                )
                                 when (result) {
                                     SnackbarResult.Dismissed -> {
                                     }
@@ -491,7 +477,7 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                 ) {
                     Icon(
                         imageVector = Icons.Filled.QrCodeScanner,
-                        contentDescription = "Scan barcode"
+                        contentDescription = "扫描条形码"
                     )
                 }
             }
@@ -517,10 +503,10 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                     containerColor = MaterialTheme.colorScheme.background,
                     actions = {
                         OutlinedTextField(
-                            label = { Text("Search") },
+                            label = { Text("搜索") },
                             placeholder = {
                                 Text(
-                                    "Part number, manufacturer, or description. Use , or and to separate",
+                                    "零件编号、制造商或描述。使用逗号或and分隔多个条件",
                                     fontSize = 10.sp,
                                     modifier = Modifier
                                         .fillMaxSize()
@@ -534,7 +520,7 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                                 if (searchText.length > 0) {
                                     Icon(
                                         imageVector = Icons.Filled.Cancel,
-                                        contentDescription = "Clear",
+                                        contentDescription = "清除",
                                         modifier = Modifier.clickable {
                                             searchText = ""
                                         }
@@ -577,7 +563,7 @@ fun PartsList(parts: List<Part>, onPartClicked: (part: Part) -> Unit) {
                         );
                     AsyncImage(
                         model = req.build(),
-                        contentDescription = null,
+                        contentDescription = "零件图片",
                         modifier = Modifier
                             .width(48.dp)
                             .height(48.dp)
@@ -586,7 +572,7 @@ fun PartsList(parts: List<Part>, onPartClicked: (part: Part) -> Unit) {
                 } else {
                     Icon(
                         imageVector = Icons.Filled.PictureInPicture,
-                        contentDescription = null,
+                        contentDescription = "无图片",
                         modifier = Modifier
                             .width(48.dp)
                             .height(48.dp)
@@ -625,7 +611,6 @@ fun PartsList(parts: List<Part>, onPartClicked: (part: Part) -> Unit) {
 
         }
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -642,7 +627,7 @@ fun ConfirmRemoveDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
         ) {
             Column(modifier = Modifier.padding(8.dp)) {
                 Text(
-                    text = "Are you sure you want to delete?",
+                    text = "确定要删除吗？",
                     modifier = Modifier
                         .padding(16.dp)
                         .fillMaxWidth(),
@@ -655,14 +640,14 @@ fun ConfirmRemoveDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
                     TextButton(
                         onClick = { onDismiss() }
                     ) {
-                        Text("No")
+                        Text("取消")
                     }
                     TextButton(
                         onClick = {
                             onConfirm()
                         }
                     ) {
-                        Text("Yes", color = Colors.Danger)
+                        Text("确定", color = Colors.Danger)
                     }
                 }
             }
@@ -702,9 +687,12 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
         topBar = {
             TopAppBar(
                 modifier = Modifier.shadow(20.dp),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF5EB4FF) // Light blue color
+                ),
                 title = {
                     if (partId == 0) {
-                        Text("Add Part")
+                        Text("添加零件")
                     } else {
                         SelectionContainer {
                             Text(partMpn, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -716,7 +704,7 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                     IconButton(onClick = { nav.navigateUp() }) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = "返回"
                         )
                     }
                 },
@@ -726,7 +714,7 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                     IconButton(onClick = { expanded = true }) {
                         Icon(
                             imageVector = Icons.Filled.MoreVert,
-                            contentDescription = "More"
+                            contentDescription = "更多"
                         )
                     }
                     DropdownMenu(
@@ -735,7 +723,7 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                     ) {
                         if (partMpn.isNotBlank() || partSku.isNotBlank()) {
                             DropdownMenuItem(
-                                text = { Text("Import from supplier") },
+                                text = { Text("从供应商导入") },
                                 onClick = {
                                     scope.launch {
                                         when (originalPart.importFromSupplier()) {
@@ -748,12 +736,12 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                                                 partUpdated = originalPart.updated
 
                                                 // If import is pressed before save
-                                                var msg = "Imported!"
+                                                var msg = "导入成功！"
                                                 if (partId == 0) {
                                                     if (state.addPart(originalPart)) {
                                                         partId = originalPart.id
                                                     } else {
-                                                        msg = "A part with this MPN already exists!"
+                                                        msg = "该零件型号已存在！"
                                                     }
                                                 } else {
                                                     state.savePart(originalPart);
@@ -761,12 +749,12 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                                                 snackbarState.showSnackbar(msg)
                                             }
                                             ImportResult.NoData -> {
-                                                snackbarState.showSnackbar("No data was imported.")
+                                                snackbarState.showSnackbar("未找到可导入的数据。")
                                             }
                                             ImportResult.MultipleResults -> {
                                                 val r = snackbarState.showSnackbar(
-                                                    "No exact part match found. Try adding an SKU",
-                                                    actionLabel = "Search supplier website"
+                                                    "未找到匹配的零件。请试试添加 SKU",
+                                                    actionLabel = "搜索供应商网站"
                                                 )
                                                 when (r) {
                                                     SnackbarResult.ActionPerformed -> {
@@ -779,7 +767,7 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                                                             context.startActivity(browserIntent)
                                                         } catch (e: Exception) {
                                                             scope.launch {
-                                                                snackbarState.showSnackbar("Search url is invalid")
+                                                                snackbarState.showSnackbar("搜索网址无效")
                                                             }
                                                         }
                                                     }
@@ -787,7 +775,7 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                                                 }
                                             }
                                             else -> {
-                                                snackbarState.showSnackbar("Failed to import.")
+                                                snackbarState.showSnackbar("导入失败。")
                                             }
                                         }
                                     }
@@ -795,21 +783,20 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                                 leadingIcon = {
                                     Icon(
                                         Icons.Filled.SystemUpdateAlt,
-                                        contentDescription = "Import",
+                                        contentDescription = "导入",
                                     )
                                 })
                         }
                         if (partId != 0) {
                             DropdownMenuItem(
-                                text = { Text("Delete", color = Colors.Danger) },
+                                text = { Text("删除", color = Colors.Danger) },
                                 onClick = {
                                     showRemoveDialog = true
                                 },
                                 leadingIcon = {
                                     Icon(
                                         Icons.Filled.Delete,
-                                        contentDescription = "Delete",
-                                        //color = Colors.Danger,
+                                        contentDescription = "删除",
                                     )
                                 })
                         }
@@ -837,7 +824,7 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                 ) {
                     Icon(
                         imageVector = if (!editMode) Icons.Filled.Edit else Icons.Filled.EditOff,
-                        contentDescription = "Edit"
+                        contentDescription = "编辑"
                     )
                 }
                 FloatingActionButton(
@@ -845,13 +832,13 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                     shape = CircleShape,
                     onClick = {
                         scope.launch {
-                            var msg = "Part saved!"
+                            var msg = "保存成功！"
                             if (partId == 0) {
                                 if (state.addPart(originalPart)) {
                                     partId = originalPart.id
-                                    Log.d(TAG, "Added new part ${originalPart.id}")
+                                    Log.d(TAG, "添加新零件 ${originalPart.id}")
                                 } else {
-                                    msg = "Cannot save. A part with this MPN already exists!"
+                                    msg = "无法保存。该零件型号已存在！"
                                 }
 
                             } else {
@@ -864,7 +851,7 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Save,
-                        contentDescription = "Save"
+                        contentDescription = "保存"
                     )
                 }
             }
@@ -898,12 +885,12 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                                     context.startActivity(browserIntent)
                                 } catch (e: Exception) {
                                     scope.launch {
-                                        snackbarState.showSnackbar("Datasheet url is invalid")
+                                        snackbarState.showSnackbar("数据手册链接无效")
                                     }
                                 }
                             }
                         ) {
-                            Text("Datasheet")
+                            Text("数据手册")
                         }
                     }
                     if (partSupplierUrl.isNotBlank()) {
@@ -916,12 +903,12 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                                     context.startActivity(browserIntent)
                                 } catch (e: Exception) {
                                     scope.launch {
-                                        snackbarState.showSnackbar("Supplier url is invalid")
+                                        snackbarState.showSnackbar("供应商网址无效")
                                     }
                                 }
                             }
                         ) {
-                            Text("Open supplier website")
+                            Text("访问供应商网站")
                         }
                     }
                 }
@@ -934,7 +921,14 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                         singleLine = true,
                         value = partMpn,
                         onValueChange = { partMpn = it; originalPart.mpn = it },
-                        label = { Text("MPN") }
+                        label = { Text("零件型号") },
+                        trailingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.QrCode,
+                                contentDescription = "零件型号",
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
                     )
                     OutlinedTextField(
                         modifier = Modifier
@@ -943,7 +937,7 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                         value = partManufacturer,
                         onValueChange = { partManufacturer = it; originalPart.manufacturer = it },
                         singleLine = true,
-                        label = { Text("Manufacturer") }
+                        label = { Text("制造商") }
                     )
 
                     OutlinedTextField(
@@ -953,7 +947,7 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                         value = partDesc,
                         onValueChange = { partDesc = it; originalPart.description = it },
                         singleLine = true,
-                        label = { Text("Description") }
+                        label = { Text("描述") }
                     )
                     OutlinedTextField(
                         modifier = Modifier
@@ -962,7 +956,7 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                         singleLine = true,
                         value = partSku,
                         onValueChange = { partSku = it; originalPart.sku = it },
-                        label = { Text("Supplier SKU") }
+                        label = { Text("供应商 SKU") }
                     )
                     OutlinedTextField(
                         modifier = Modifier
@@ -971,17 +965,17 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                         singleLine = true,
                         value = partSupplier,
                         onValueChange = { partSupplier = it; originalPart.supplier = it },
-                        label = { Text("Supplier") }
+                        label = { Text("供应商") }
                     )
                 } else {
                     Text(
-                        "Last updated on ${partUpdated.toString()}",
+                        "最后更新于 ${partUpdated.toString()}",
                         fontWeight = FontWeight.Light,
                         fontSize = 12.sp,
                         modifier = Modifier.padding(8.dp, 4.dp)
                     )
                     Text(
-                        "MPN",
+                        "零件型号",
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(8.dp, 8.dp, 8.dp, 0.dp)
                     )
@@ -989,7 +983,7 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                         Text(partMpn, modifier = Modifier.padding(8.dp))
                     }
                     Text(
-                        "Manufacturer",
+                        "制造商",
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(8.dp, 8.dp, 8.dp, 0.dp)
                     )
@@ -1000,7 +994,7 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                         )
                     }
                     Text(
-                        "Description",
+                        "描述",
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(8.dp, 8.dp, 8.dp, 0.dp)
                     )
@@ -1011,7 +1005,7 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                         )
                     }
                     Text(
-                        "Unit Price",
+                        "单价",
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(8.dp, 8.dp, 8.dp, 0.dp)
                     )
@@ -1022,7 +1016,7 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                         )
                     }
                     Text(
-                        "Total Price",
+                        "总价",
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(8.dp, 8.dp, 8.dp, 0.dp)
                     )
@@ -1033,7 +1027,7 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                         )
                     }
                     Text(
-                        "Suppler",
+                        "供应商",
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(8.dp, 8.dp, 8.dp, 0.dp)
                     )
@@ -1044,7 +1038,7 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                         )
                     }
                     Text(
-                        "Suppler SKU",
+                        "供应商 SKU",
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(8.dp, 8.dp, 8.dp, 0.dp)
                     )
@@ -1074,10 +1068,9 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
                     ),
-                    label = { Text("Qty ordered") }
+                    label = { Text("订购数量") }
                 )
                 OutlinedTextField(
-
                     modifier = Modifier
                         .padding(8.dp)
                         .fillMaxWidth(),
@@ -1096,7 +1089,7 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
                     ),
-                    label = { Text("Qty in stock") }
+                    label = { Text("库存数量") }
                 )
 
                 OutlinedTextField(
@@ -1106,7 +1099,7 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                     singleLine = true,
                     value = partLocation,
                     onValueChange = { partLocation = it; originalPart.location = it },
-                    label = { Text("Location") }
+                    label = { Text("存放位置") }
                 )
                 if (editing) {
                     OutlinedTextField(
@@ -1128,7 +1121,7 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number,
                         ),
-                        label = { Text("Unit price") }
+                        label = { Text("单价") }
                     )
 
                     OutlinedTextField(
@@ -1138,7 +1131,7 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                         value = partDatasheet,
                         onValueChange = { partDatasheet = it; originalPart.datasheetUrl = it },
                         singleLine = true,
-                        label = { Text("Datasheet Url") }
+                        label = { Text("数据手册链接") }
                     )
 
                     OutlinedTextField(
@@ -1148,11 +1141,11 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                         value = partImage,
                         onValueChange = { partImage = it; originalPart.pictureUrl = it },
                         singleLine = true,
-                        label = { Text("Image Url") }
+                        label = { Text("图片链接") }
                     )
                 }
                 Text(
-                    "Created on ${originalPart.created.toString()}",
+                    "创建于 ${originalPart.created.toString()}",
                     fontWeight = FontWeight.Light,
                     fontSize = 12.sp,
                     modifier = Modifier.padding(8.dp, 4.dp)

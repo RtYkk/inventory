@@ -1,4 +1,4 @@
-package com.codelv.inventory.ui.theme
+package jlu.meng.inventory.ui.theme
 
 import android.app.Activity
 import android.os.Build

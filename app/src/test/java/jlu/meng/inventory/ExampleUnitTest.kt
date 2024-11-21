@@ -1,4 +1,4 @@
-package com.codelv.inventory
+package jlu.meng.inventory
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

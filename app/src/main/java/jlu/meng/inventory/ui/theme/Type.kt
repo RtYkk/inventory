@@ -1,4 +1,4 @@
-package com.codelv.inventory.ui.theme
+package jlu.meng.inventory.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
