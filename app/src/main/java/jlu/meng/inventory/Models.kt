@@ -609,6 +609,12 @@ interface PartManager {
 }
 
 @Dao
+interface PartDao {
+    @Query("SELECT SUM(num_in_stock) FROM parts")
+    suspend fun getTotalNumInStock(): Int
+}
+
+@Dao
 interface ScanManager {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(vararg items: Scan): List<Long>
@@ -646,11 +652,13 @@ interface ScanManager {
         AutoMigration(from = 1, to = 2)
     ]
 )
+
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun parts(): PartManager
     abstract fun scans(): ScanManager
+    abstract fun partDao(): PartDao
 
     companion object {
         @Volatile

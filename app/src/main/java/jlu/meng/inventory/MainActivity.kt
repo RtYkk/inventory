@@ -2,6 +2,7 @@ package jlu.meng.inventory
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.WindowManager
@@ -10,6 +11,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -54,11 +57,26 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.journeyapps.barcodescanner.ScanContract
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.time.delay
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import kotlin.time.Duration.Companion.seconds
+import androidx.compose.runtime.*
+import kotlinx.coroutines.delay
+import java.time.LocalDate
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.Icon
+import androidx.compose.material.icons.rounded.ImageNotSupported
+import androidx.compose.material.icons.rounded.Menu
+import androidx.compose.runtime.Composable
+import androidx.room.Room
+import kotlinx.coroutines.GlobalScope
 
 
 val TAG = "MainActivity";
 
 class MainActivity : ComponentActivity() {
+    private lateinit var partDao: PartDao
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         var state = AppViewModel(database = (application as App).db)
@@ -77,9 +95,22 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        // 初始化数据库和 DAO
+        val db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java, "inventory-database"
+        ).build()
+        partDao = db.partDao()
+
+        // 获取 num_in_stock 的总和
+        GlobalScope.launch {
+            val totalNumInStock = partDao.getTotalNumInStock()
+            Log.d("MainActivity", "Total num_in_stock: $totalNumInStock")
+        }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Main(state: AppViewModel) {
     val nav = rememberNavController()
@@ -123,7 +154,7 @@ fun ScansScreen(nav: NavHostController, state: AppViewModel) {
                 {
                     IconButton(onClick = { nav.navigateUp() }) {
                         Icon(
-                            imageVector = Icons.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "返回"
                         )
                     }
@@ -275,6 +306,7 @@ fun search(parts: List<Part>, query: String, ignoreCase: Boolean = true): List<P
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun PartsScreen(nav: NavHostController, state: AppViewModel) {
@@ -345,6 +377,16 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
         }
     }
 
+    var currentDate by remember { mutableStateOf(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))) }
+    var currentTime by remember { mutableStateOf(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            currentTime = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+            delay(1000)
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -354,7 +396,7 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                 ),
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("零件")
+                        Text("所有零件")
                         Text(
                             "${state.parts.size}",
                             fontSize = 12.sp,
@@ -489,6 +531,37 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                     .padding(it)
                     .fillMaxSize()
             ) {
+                Box(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .wrapContentWidth()
+                        .align(Alignment.CenterHorizontally)
+                        .background(Color(0xFF5EB4FF), RoundedCornerShape(16.dp))
+                ) {
+                    Column {
+                        Text(
+                            text = currentTime,
+                            fontSize = 64.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp, 32.dp, 32.dp, 4.dp)
+                                .align(Alignment.CenterHorizontally),
+                            textAlign = TextAlign.Center,
+                            letterSpacing = 2.sp
+                        )
+                        Text(
+                            text = currentDate,
+                            fontSize = 24.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp, 4.dp, 32.dp, 32.dp)
+                                .align(Alignment.CenterHorizontally),
+                            textAlign = TextAlign.Center,
+                            letterSpacing = 2.sp
+                        )
+                    }
+                }
                 PartsList(parts = filteredParts) { part ->
                     Log.d(TAG, "Clicked part ${part}")
                     nav.navigate("edit-part?id=${part.id}")
@@ -555,6 +628,16 @@ fun PartsList(parts: List<Part>, onPartClicked: (part: Part) -> Unit) {
                         onPartClicked(part)
                     }
             ) {
+                Text(
+                    "${parts.indexOf(part) + 1}.",
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier
+                        .width(32.dp)
+                        .align(Alignment.CenterVertically),
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
                 if (part.pictureUrl.length > 0) {
                     val req =
                         ImageRequest.Builder(LocalContext.current).data(part.pictureUrl).diskCachePolicy(
@@ -571,7 +654,7 @@ fun PartsList(parts: List<Part>, onPartClicked: (part: Part) -> Unit) {
                     )
                 } else {
                     Icon(
-                        imageVector = Icons.Filled.PictureInPicture,
+                        imageVector = Icons.Rounded.ImageNotSupported,
                         contentDescription = "无图片",
                         modifier = Modifier
                             .width(48.dp)
@@ -582,9 +665,9 @@ fun PartsList(parts: List<Part>, onPartClicked: (part: Part) -> Unit) {
                 Column(
                     modifier = Modifier.weight(5f)
                 ) {
-
                     Text(
                         part.mpn,
+                        fontSize = 24.sp,
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1
                     )
@@ -594,21 +677,15 @@ fun PartsList(parts: List<Part>, onPartClicked: (part: Part) -> Unit) {
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1
                     )
-                    Text(
-                        part.description,
-                        fontSize = 12.sp,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1
-                    )
                 }
                 Text(
                     "${part.num_in_stock}",
                     color = MaterialTheme.colorScheme.primary,
                     textAlign = TextAlign.End,
-                    modifier = Modifier.width(64.dp)
+                    modifier = Modifier.width(64.dp),
+                    fontSize = 18.sp
                 )
             }
-
         }
     }
 }
