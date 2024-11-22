@@ -73,10 +73,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.draw.clip
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.room.Room
+import coil3.request.crossfade
 import kotlinx.coroutines.GlobalScope
 
-
 val TAG = "MainActivity";
+
 
 class MainActivity : ComponentActivity() {
     private lateinit var partDao: PartDao
@@ -1077,15 +1078,60 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                     .verticalScroll(rememberScrollState())
                     .fillMaxWidth()
             ) {
-                if (partImage.length > 0) {
-                    AsyncImage(
-                        model = partImage,
-                        contentDescription = null,
+                if (partImage.isNotEmpty()) {
+                    Card(
                         modifier = Modifier
-                            .height(200.dp)
                             .padding(16.dp)
-                            .align(Alignment.CenterHorizontally),
-                    )
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .shadow(
+                                elevation = 4.dp,
+                                shape = RoundedCornerShape(16.dp),
+                                spotColor = Color.Black.copy(alpha = 0.25f)
+                            ),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(partImage)
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = "零件图片",
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
+                    }
+                } else {
+                    Card(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .shadow(
+                                elevation = 4.dp,
+                                shape = RoundedCornerShape(16.dp),
+                                spotColor = Color.Black.copy(alpha = 0.25f)
+                            ),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.ImageNotSupported,
+                                contentDescription = "无图片",
+                                modifier = Modifier.size(48.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 }
 
                 Row {
