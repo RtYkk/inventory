@@ -70,6 +70,7 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.rounded.ImageNotSupported
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.draw.clip
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.room.Room
 import kotlinx.coroutines.GlobalScope
@@ -382,6 +383,8 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
     var currentDate by remember { mutableStateOf(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))) }
     var currentTime by remember { mutableStateOf(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))) }
 
+    val totalStock = filteredParts.sumOf { it.num_in_stock }
+    
     LaunchedEffect(Unit) {
         while (true) {
             currentTime = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
@@ -535,7 +538,7 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
             ) {
                 Box(
                     modifier = Modifier
-                        .padding(16.dp)
+                        .padding(16.dp, 16.dp, 16.dp, 8.dp) // Reduced bottom padding
                         .wrapContentWidth()
                         .align(Alignment.CenterHorizontally)
                         .shadow(
@@ -549,7 +552,7 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                     Column {
                         Text(
                             text = currentTime,
-                            fontSize = 58.sp,
+                            fontSize = 54.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -568,6 +571,88 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                             textAlign = TextAlign.Center,
                             letterSpacing = 2.sp
                         )
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .shadow(
+                                elevation = 2.dp,
+                                shape = RoundedCornerShape(16.dp),
+                                spotColor = Color.Black.copy(alpha = 0.25f),
+                                ambientColor = Color.Black.copy(alpha = 0.25f)
+                            )
+                            .background(Color(0xFF24EECF), RoundedCornerShape(16.dp))
+                    ) {
+                        Column {
+                            Text(
+                                text = when {
+                                    totalStock >= 100000 -> String.format("%dK", totalStock / 1000)
+                                    totalStock >= 10000 -> String.format("%.1fK", totalStock / 1000.0)
+                                    else -> totalStock.toString()
+                                },
+                                fontSize = 36.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(24.dp, 24.dp, 24.dp, 4.dp)
+                                    .align(Alignment.CenterHorizontally),
+                                textAlign = TextAlign.Center,
+                                letterSpacing = 2.sp
+                            )
+                            Text(
+                                text = "库存总数",
+                                fontSize = 18.sp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(24.dp, 4.dp, 24.dp, 24.dp)
+                                    .align(Alignment.CenterHorizontally),
+                                textAlign = TextAlign.Center,
+                                letterSpacing = 2.sp
+                            )
+                        }
+                    }
+                    
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .shadow(
+                                elevation = 2.dp,
+                                shape = RoundedCornerShape(16.dp),
+                                spotColor = Color.Black.copy(alpha = 0.25f),
+                                ambientColor = Color.Black.copy(alpha = 0.25f)
+                            )
+                            .background(Color(0xFF9FFF2A), RoundedCornerShape(16.dp))
+                    ) {
+                        Column {
+                            Text(
+                                text = state.parts.size.toString(),
+                                fontSize = 36.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(24.dp, 24.dp, 24.dp, 4.dp)
+                                    .align(Alignment.CenterHorizontally),
+                                textAlign = TextAlign.Center,
+                                letterSpacing = 2.sp
+                            )
+                            Text(
+                                text = "总品类",
+                                fontSize = 18.sp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(24.dp, 4.dp, 24.dp, 24.dp)
+                                    .align(Alignment.CenterHorizontally),
+                                textAlign = TextAlign.Center,
+                                letterSpacing = 2.sp
+                            )
+                        }
                     }
                 }
                 PartsList(parts = filteredParts) { part ->
@@ -620,79 +705,123 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
     )
 }
 
-@Composable
+@Composable 
 fun PartsList(parts: List<Part>, onPartClicked: (part: Part) -> Unit) {
     LazyColumn(
         state = rememberLazyListState(),
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        items(parts, key = { p -> p.id } ) { part ->
-            Row(
+        items(parts, key = { p -> p.id }) { part ->
+            Card(
                 modifier = Modifier
-                    .padding(8.dp)
                     .fillMaxWidth()
-                    .clickable {
-                        onPartClicked(part)
-                    }
+                    .clickable { onPartClicked(part) }
+                    .shadow(
+                        elevation = 2.dp,
+                        shape = RoundedCornerShape(16.dp),
+                        spotColor = Color.Black.copy(alpha = 0.25f)
+                    ),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             ) {
-                Text(
-                    "${parts.indexOf(part) + 1}.",
-                    color = MaterialTheme.colorScheme.secondary,
+                Row(
                     modifier = Modifier
-                        .width(32.dp)
-                        .align(Alignment.CenterVertically),
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
-                if (part.pictureUrl.length > 0) {
-                    val req =
-                        ImageRequest.Builder(LocalContext.current).data(part.pictureUrl).diskCachePolicy(
-                            CachePolicy.ENABLED).httpHeaders(
-                            NetworkHeaders.Builder().add("User-Agent", userAgent).build()
-                        );
-                    AsyncImage(
-                        model = req.build(),
-                        contentDescription = "零件图片",
-                        modifier = Modifier
-                            .width(48.dp)
-                            .height(48.dp)
-                            .padding(8.dp),
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Rounded.ImageNotSupported,
-                        contentDescription = "无图片",
-                        modifier = Modifier
-                            .width(48.dp)
-                            .height(48.dp)
-                            .padding(8.dp),
-                    )
-                }
-                Column(
-                    modifier = Modifier.weight(5f)
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        part.mpn,
-                        fontSize = 24.sp,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1
+                    // 库存状态指示
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .background(
+                                when {
+                                    part.num_in_stock <= 0 -> Color.Red
+                                    part.num_in_stock < 100 -> Color(0xFFFFA000) // 琥珀色
+                                    else -> Color(0xFF4CAF50) // 绿色
+                                },
+                                CircleShape
+                            )
+                            .align(Alignment.CenterVertically)
                     )
-                    Text(
-                        part.manufacturer,
-                        fontSize = 12.sp,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1
-                    )
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    // 图片部分
+                    if (part.pictureUrl.isNotEmpty()) {
+                        val req = ImageRequest.Builder(LocalContext.current)
+                            .data(part.pictureUrl)
+                            .diskCachePolicy(CachePolicy.ENABLED)
+                            .httpHeaders(NetworkHeaders.Builder().add("User-Agent", userAgent).build())
+                        AsyncImage(
+                            model = req.build(),
+                            contentDescription = "零件图片",
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .background(
+                                    MaterialTheme.colorScheme.surfaceVariant,
+                                    RoundedCornerShape(8.dp)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.ImageNotSupported,
+                                contentDescription = "无图片",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    // 文字信息部分
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            part.mpn,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Medium,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            part.manufacturer,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1
+                        )
+                    }
+
+                    // 库存数量
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                MaterialTheme.colorScheme.primaryContainer,
+                                RoundedCornerShape(8.dp)
+                            )
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            "${part.num_in_stock}",
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
+                    }
                 }
-                Text(
-                    "${part.num_in_stock}",
-                    color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier.width(64.dp),
-                    fontSize = 18.sp
-                )
             }
         }
     }
