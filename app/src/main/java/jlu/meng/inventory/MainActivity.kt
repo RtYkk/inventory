@@ -588,7 +588,7 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                                 spotColor = Color.Black.copy(alpha = 0.25f),
                                 ambientColor = Color.Black.copy(alpha = 0.25f)
                             )
-                            .background(Color(0xFF24EECF), RoundedCornerShape(16.dp))
+                            .background(Color(0xFF1DBBA2), RoundedCornerShape(16.dp))
                     ) {
                         Column {
                             Text(
@@ -628,7 +628,7 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                                 spotColor = Color.Black.copy(alpha = 0.25f),
                                 ambientColor = Color.Black.copy(alpha = 0.25f)
                             )
-                            .background(Color(0xFF9FFF2A), RoundedCornerShape(16.dp))
+                            .background(Color(0xFF80CB22), RoundedCornerShape(16.dp))
                     ) {
                         Column {
                             Text(
