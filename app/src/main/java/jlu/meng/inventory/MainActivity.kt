@@ -153,6 +153,9 @@ fun ScansScreen(nav: NavHostController, state: AppViewModel) {
         topBar = {
             TopAppBar(
                 modifier = Modifier.shadow(20.dp),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF5EB4FF) // Light blue color
+                ),
                 title = { Text("扫描的条形码") },
                 navigationIcon =
                 {
@@ -1173,314 +1176,341 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                     }
                 }
 
-                if (editing) {
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth(),
-                        singleLine = true,
-                        value = partMpn,
-                        onValueChange = { partMpn = it; originalPart.mpn = it },
-                        label = { Text("零件型号") },
-                        trailingIcon = {
-                            Icon(
-                                imageVector = Icons.Filled.Badge,
-                                contentDescription = "零件型号",
-                                modifier = Modifier.padding(8.dp)
+                Card(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(4.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        if (editing) {
+                            // Base Information Group
+                            Text(
+                                "基本信息",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = 12.dp)
                             )
-                        }
-                    )
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth(),
-                        value = partManufacturer,
-                        onValueChange = { partManufacturer = it; originalPart.manufacturer = it },
-                        singleLine = true,
-                        label = { Text("制造商") },
-                        trailingIcon = {
-                            Icon(
-                                imageVector = Icons.Filled.Factory,
-                                contentDescription = "制造商",
-                                modifier = Modifier.padding(8.dp)
+                            OutlinedTextField(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 8.dp),
+                                singleLine = true,
+                                value = partMpn,
+                                onValueChange = { partMpn = it; originalPart.mpn = it },
+                                label = { Text("零件型号") },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Filled.Badge,
+                                        contentDescription = "零件型号"
+                                    )
+                                }
                             )
-                        }
-                    )
+                            OutlinedTextField(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 8.dp),
+                                value = partManufacturer,
+                                onValueChange = { partManufacturer = it; originalPart.manufacturer = it },
+                                singleLine = true,
+                                label = { Text("制造商") },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Filled.Factory,
+                                        contentDescription = "制造商"
+                                    )
+                                }
+                            )
+                            OutlinedTextField(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 8.dp),
+                                value = partDesc,
+                                onValueChange = { partDesc = it; originalPart.description = it },
+                                singleLine = true,
+                                label = { Text("描述") },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Filled.Description,
+                                        contentDescription = "描述"
+                                    )
+                                }
+                            )
 
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth(),
-                        value = partDesc,
-                        onValueChange = { partDesc = it; originalPart.description = it },
-                        singleLine = true,
-                        label = { Text("描述") },
-                        trailingIcon = {
-                            Icon(
-                                imageVector = Icons.Filled.Description,
-                                contentDescription = "描述",
-                                modifier = Modifier.padding(8.dp)
+                            Divider(modifier = Modifier.padding(vertical = 16.dp))
+
+                            // Supplier Information Group
+                            Text(
+                                "供应商信息",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = 12.dp)
                             )
-                        }
-                    )
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth(),
-                        singleLine = true,
-                        value = partSku,
-                        onValueChange = { partSku = it; originalPart.sku = it },
-                        label = { Text("供应商 SKU") },
-                        trailingIcon = {
-                            Icon(
-                                imageVector = Icons.Filled.Pin,
-                                contentDescription = "供应商 SKU",
-                                modifier = Modifier.padding(8.dp)
+                            OutlinedTextField(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 8.dp),
+                                singleLine = true,
+                                value = partSku,
+                                onValueChange = { partSku = it; originalPart.sku = it },
+                                label = { Text("供应商 SKU") },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Filled.Pin,
+                                        contentDescription = "供应商 SKU"
+                                    )
+                                }
                             )
-                        }
-                    )
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth(),
-                        singleLine = true,
-                        value = partSupplier,
-                        onValueChange = { partSupplier = it; originalPart.supplier = it },
-                        label = { Text("供应商") },
-                        trailingIcon = {
-                            Icon(
-                                imageVector = Icons.Filled.Storefront,
-                                contentDescription = "供应商",
-                                modifier = Modifier.padding(8.dp)
+                            OutlinedTextField(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 8.dp),
+                                singleLine = true,
+                                value = partSupplier,
+                                onValueChange = { partSupplier = it; originalPart.supplier = it },
+                                label = { Text("供应商") },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Filled.Storefront,
+                                        contentDescription = "供应商"
+                                    )
+                                }
                             )
+                        } else {
+                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                InfoGroup(
+                                    title = "基本信息",
+                                    items = listOf(
+                                        "零件型号" to partMpn,
+                                        "制造商" to (if (partManufacturer.isNotBlank()) partManufacturer else "N/A"),
+                                        "描述" to (if (partDesc.isNotBlank()) partDesc else "N/A")
+                                    )
+                                )
+
+                                InfoGroup(
+                                    title = "价格信息",
+                                    items = listOf(
+                                        "单价" to "${"$%.2f".format(partUnitPrice)}",
+                                        "总价" to "${"$%.2f".format(partUnitPrice * partNumOrdered)}"
+                                    )
+                                )
+
+                                InfoGroup(
+                                    title = "供应商信息",
+                                    items = listOf(
+                                        "供应商" to (if (partSupplier.isNotBlank()) partSupplier else "N/A"),
+                                        "SKU" to (if (partSku.isNotBlank()) partSku else "N/A")
+                                    )
+                                )
+
+                                Text(
+                                    "最后更新于 ${partUpdated}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
-                    )
-                } else {
-                    Text(
-                        "最后更新于 ${partUpdated.toString()}",
-                        fontWeight = FontWeight.Light,
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(8.dp, 4.dp)
-                    )
-                    Text(
-                        "零件型号",
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(8.dp, 8.dp, 8.dp, 0.dp)
-                    )
-                    SelectionContainer {
-                        Text(partMpn, modifier = Modifier.padding(8.dp))
-                    }
-                    Text(
-                        "制造商",
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(8.dp, 8.dp, 8.dp, 0.dp)
-                    )
-                    SelectionContainer {
-                        Text(
-                            if (partManufacturer.trimmedLength() > 0) partManufacturer else "N/A",
-                            modifier = Modifier.padding(8.dp),
-                        )
-                    }
-                    Text(
-                        "描述",
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(8.dp, 8.dp, 8.dp, 0.dp)
-                    )
-                    SelectionContainer {
-                        Text(
-                            if (partDesc.trimmedLength() > 0) partDesc else "N/A",
-                            modifier = Modifier.padding(8.dp),
-                        )
-                    }
-                    Text(
-                        "单价",
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(8.dp, 8.dp, 8.dp, 0.dp)
-                    )
-                    SelectionContainer {
-                        Text(
-                            "$${"%.5f".format(partUnitPrice)}",
-                            modifier = Modifier.padding(8.dp),
-                        )
-                    }
-                    Text(
-                        "总价",
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(8.dp, 8.dp, 8.dp, 0.dp)
-                    )
-                    SelectionContainer {
-                        Text(
-                            "$${"%.5f".format(partUnitPrice * partNumOrdered)}",
-                            modifier = Modifier.padding(8.dp),
-                        )
-                    }
-                    Text(
-                        "供应商",
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(8.dp, 8.dp, 8.dp, 0.dp)
-                    )
-                    SelectionContainer {
-                        Text(
-                            if (partSupplier.trimmedLength() > 0) partSupplier else "N/A",
-                            modifier = Modifier.padding(8.dp),
-                        )
-                    }
-                    Text(
-                        "供应商 SKU",
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(8.dp, 8.dp, 8.dp, 0.dp)
-                    )
-                    SelectionContainer {
-                        Text(
-                            if (partSku.trimmedLength() > 0) partSku else "N/A",
-                            modifier = Modifier.padding(8.dp)
-                        )
                     }
                 }
-                OutlinedTextField(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(),
-                    value = partNumOrdered.toString(),
-                    onValueChange = {
-                        try {
-                            val v = Integer.parseUnsignedInt(it);
-                            partNumOrdered = v;
-                            originalPart.num_ordered = v
-                        } catch (e: Exception) {
-                            Log.d(TAG, e.toString());
-                            partNumOrdered = 0;
-                            originalPart.num_ordered = 0
-                        }
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                    ),
-                    label = { Text("订购数量") }
-                )
-                OutlinedTextField(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(),
-                    value = partNumInStock.toString(),
-                    onValueChange = {
-                        try {
-                            val v = Integer.parseUnsignedInt(it);
-                            partNumInStock = v;
-                            originalPart.num_in_stock = v
-                        } catch (e: Exception) {
-                            Log.d(TAG, e.toString());
-                            partNumInStock = 0;
-                            originalPart.num_in_stock = 0
-                        }
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                    ),
-                    label = { Text("库存数量") }
-                )
 
-                OutlinedTextField(
+                Card(
                     modifier = Modifier
-                        .padding(8.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                         .fillMaxWidth(),
-                    singleLine = true,
-                    value = partLocation,
-                    onValueChange = { partLocation = it; originalPart.location = it },
-                    label = { Text("存放位置") },
-                    trailingIcon = {
-                        Icon(
-                            imageVector = Icons.Filled.LocationOn,
-                            contentDescription = "存放位置",
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    }
-                )
-                if (editing) {
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth(),
-                        value = partUnitPrice.toString(),
-                        onValueChange = {
-                            try {
-                                val v = it.toDouble();
-                                partUnitPrice = v;
-                                originalPart.unit_price = v
-                            } catch (e: Exception) {
-                                Log.d(TAG, e.toString());
-                                partUnitPrice = 0.0
-                                originalPart.unit_price = 0.0
-                            }
-                        },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number,
-                        ),
-                        label = { Text("单价") },
-                        trailingIcon = {
-                            Icon(
-                                imageVector = Icons.Filled.AttachMoney,
-                                contentDescription = "单价",
-                                modifier = Modifier.padding(8.dp)
-                            )
-                        }
-                    )
-
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth(),
-                        value = partDatasheet,
-                        onValueChange = { partDatasheet = it; originalPart.datasheetUrl = it },
-                        singleLine = true,
-                        label = { Text("数据手册链接") },
-                        trailingIcon = {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.MenuBook,
-                                contentDescription = "数据手册",
-                                modifier = Modifier.padding(8.dp)
-                            )
-                        }
-                    )
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(4.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
                     ) {
-                        IconButton(
-                            onClick = { 
-                                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://p.sda1.dev/"))
-                                context.startActivity(browserIntent)
-                            },
-                            modifier = Modifier.align(Alignment.CenterVertically)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.AddPhotoAlternate, 
-                                contentDescription = "添加图片"
-                            )
-                        }
+                        Text(
+                            "库存信息",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
+                        
                         OutlinedTextField(
                             modifier = Modifier
-                                .weight(1f),
-                            value = partImage,
-                            onValueChange = { partImage = it; originalPart.pictureUrl = it },
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp),
+                            value = partNumOrdered.toString(),
+                            onValueChange = {
+                                try {
+                                    val v = Integer.parseUnsignedInt(it)
+                                    partNumOrdered = v
+                                    originalPart.num_ordered = v
+                                } catch (e: Exception) {
+                                    partNumOrdered = 0
+                                    originalPart.num_ordered = 0
+                                }
+                            },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            label = { Text("订购数量") },
+                            leadingIcon = { Icon(Icons.Filled.ShoppingCart, null) }
+                        )
+
+                        OutlinedTextField(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp),
+                            value = partNumInStock.toString(),
+                            onValueChange = {
+                                try {
+                                    val v = Integer.parseUnsignedInt(it)
+                                    partNumInStock = v
+                                    originalPart.num_in_stock = v
+                                } catch (e: Exception) {
+                                    partNumInStock = 0
+                                    originalPart.num_in_stock = 0
+                                }
+                            },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            label = { Text("库存数量") },
+                            leadingIcon = { Icon(Icons.Filled.Inventory, null) }
+                        )
+
+                        OutlinedTextField(
+                            modifier = Modifier
+                                .fillMaxWidth(),
                             singleLine = true,
-                            label = { Text("图片链接") }
+                            value = partLocation,
+                            onValueChange = { partLocation = it; originalPart.location = it },
+                            label = { Text("存放位置") },
+                            leadingIcon = { 
+                                Icon(Icons.Filled.LocationOn, null)
+                            }
                         )
                     }
                 }
+
+                if (editing) {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.cardElevation(4.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                "附加信息",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = 12.dp)
+                            )
+
+                            OutlinedTextField(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 8.dp),
+                                value = partUnitPrice.toString(),
+                                onValueChange = {
+                                    try {
+                                        val v = it.toDouble()
+                                        partUnitPrice = v
+                                        originalPart.unit_price = v
+                                    } catch (e: Exception) {
+                                        partUnitPrice = 0.0
+                                        originalPart.unit_price = 0.0
+                                    }
+                                },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                                label = { Text("单价") },
+                                leadingIcon = { Icon(Icons.Filled.AttachMoney, null) }
+                            )
+
+                            OutlinedTextField(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 8.dp),
+                                value = partDatasheet,
+                                onValueChange = { partDatasheet = it; originalPart.datasheetUrl = it },
+                                singleLine = true,
+                                label = { Text("数据手册链接") },
+                                leadingIcon = {
+                                    Icon(Icons.AutoMirrored.Filled.MenuBook, null)
+                                }
+                            )
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                OutlinedTextField(
+                                    modifier = Modifier.weight(1f),
+                                    value = partImage,
+                                    onValueChange = { partImage = it; originalPart.pictureUrl = it },
+                                    singleLine = true,
+                                    label = { Text("图片链接") },
+                                    leadingIcon = { Icon(Icons.Default.Image, null) }
+                                )
+                                IconButton(
+                                    onClick = { 
+                                        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://p.sda1.dev/"))
+                                        context.startActivity(browserIntent)
+                                    },
+                                    modifier = Modifier
+                                        .size(56.dp)
+                                        .background(
+                                            MaterialTheme.colorScheme.primary,
+                                            CircleShape
+                                        )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.AddPhotoAlternate,
+                                        contentDescription = "添加图片",
+                                        tint = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
                 Text(
-                    "创建于 ${originalPart.created.toString()}",
-                    fontWeight = FontWeight.Light,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(8.dp, 4.dp)
+                    "创建于 ${originalPart.created}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(16.dp)
                 )
             }
         }
     )
+}
+
+@Composable
+private fun InfoGroup(
+    title: String,
+    items: List<Pair<String, String>>
+) {
+    Column {
+        Text(
+            title,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        items.forEach { (label, value) ->
+            Row(
+                modifier = Modifier.padding(start = 8.dp, bottom = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    "$label:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                SelectionContainer {
+                    Text(
+                        value,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        }
+    }
 }
 
 fun startActivityForResult(intent: Intent, requestCodeSelectImage: Int) {
