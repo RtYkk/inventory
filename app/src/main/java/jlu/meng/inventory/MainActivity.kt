@@ -66,9 +66,11 @@ import kotlinx.coroutines.delay
 import java.time.LocalDate
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Icon
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.rounded.ImageNotSupported
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.runtime.Composable
+import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.room.Room
 import kotlinx.coroutines.GlobalScope
 
@@ -536,12 +538,18 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                         .padding(16.dp)
                         .wrapContentWidth()
                         .align(Alignment.CenterHorizontally)
+                        .shadow(
+                            elevation = 8.dp,
+                            shape = RoundedCornerShape(16.dp),
+                            spotColor = Color.Black.copy(alpha = 0.25f),
+                            ambientColor = Color.Black.copy(alpha = 0.25f)
+                        )
                         .background(Color(0xFF5EB4FF), RoundedCornerShape(16.dp))
                 ) {
                     Column {
                         Text(
                             text = currentTime,
-                            fontSize = 64.sp,
+                            fontSize = 58.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -1001,7 +1009,7 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                         label = { Text("零件型号") },
                         trailingIcon = {
                             Icon(
-                                imageVector = Icons.Filled.QrCode,
+                                imageVector = Icons.Filled.Badge,
                                 contentDescription = "零件型号",
                                 modifier = Modifier.padding(8.dp)
                             )
@@ -1014,7 +1022,14 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                         value = partManufacturer,
                         onValueChange = { partManufacturer = it; originalPart.manufacturer = it },
                         singleLine = true,
-                        label = { Text("制造商") }
+                        label = { Text("制造商") },
+                        trailingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.Factory,
+                                contentDescription = "制造商",
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
                     )
 
                     OutlinedTextField(
@@ -1024,7 +1039,14 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                         value = partDesc,
                         onValueChange = { partDesc = it; originalPart.description = it },
                         singleLine = true,
-                        label = { Text("描述") }
+                        label = { Text("描述") },
+                        trailingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.Description,
+                                contentDescription = "描述",
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
                     )
                     OutlinedTextField(
                         modifier = Modifier
@@ -1033,7 +1055,14 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                         singleLine = true,
                         value = partSku,
                         onValueChange = { partSku = it; originalPart.sku = it },
-                        label = { Text("供应商 SKU") }
+                        label = { Text("供应商 SKU") },
+                        trailingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.Pin,
+                                contentDescription = "供应商 SKU",
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
                     )
                     OutlinedTextField(
                         modifier = Modifier
@@ -1042,7 +1071,14 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                         singleLine = true,
                         value = partSupplier,
                         onValueChange = { partSupplier = it; originalPart.supplier = it },
-                        label = { Text("供应商") }
+                        label = { Text("供应商") },
+                        trailingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.Storefront,
+                                contentDescription = "供应商",
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
                     )
                 } else {
                     Text(
@@ -1176,7 +1212,14 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                     singleLine = true,
                     value = partLocation,
                     onValueChange = { partLocation = it; originalPart.location = it },
-                    label = { Text("存放位置") }
+                    label = { Text("存放位置") },
+                    trailingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.LocationOn,
+                            contentDescription = "存放位置",
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
                 )
                 if (editing) {
                     OutlinedTextField(
@@ -1198,7 +1241,14 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number,
                         ),
-                        label = { Text("单价") }
+                        label = { Text("单价") },
+                        trailingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.AttachMoney,
+                                contentDescription = "单价",
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
                     )
 
                     OutlinedTextField(
@@ -1208,18 +1258,44 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                         value = partDatasheet,
                         onValueChange = { partDatasheet = it; originalPart.datasheetUrl = it },
                         singleLine = true,
-                        label = { Text("数据手册链接") }
+                        label = { Text("数据手册链接") },
+                        trailingIcon = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                                contentDescription = "数据手册",
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
                     )
 
-                    OutlinedTextField(
+                    Row(
                         modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth(),
-                        value = partImage,
-                        onValueChange = { partImage = it; originalPart.pictureUrl = it },
-                        singleLine = true,
-                        label = { Text("图片链接") }
-                    )
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(
+                            onClick = { 
+                                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://p.sda1.dev/"))
+                                context.startActivity(browserIntent)
+                            },
+                            modifier = Modifier.align(Alignment.CenterVertically)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AddPhotoAlternate, 
+                                contentDescription = "添加图片"
+                            )
+                        }
+                        OutlinedTextField(
+                            modifier = Modifier
+                                .weight(1f),
+                            value = partImage,
+                            onValueChange = { partImage = it; originalPart.pictureUrl = it },
+                            singleLine = true,
+                            label = { Text("图片链接") }
+                        )
+                    }
                 }
                 Text(
                     "创建于 ${originalPart.created.toString()}",
@@ -1230,6 +1306,14 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
             }
         }
     )
+}
+
+fun startActivityForResult(intent: Intent, requestCodeSelectImage: Int) {
+    try {
+        startActivityForResult(intent, requestCodeSelectImage)
+    } catch (e: Exception) {
+        Log.e(TAG, "Error starting activity for result: ${e.message}")
+   }
 }
 //
 //
