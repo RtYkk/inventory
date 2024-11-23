@@ -326,9 +326,11 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
     var searchText by remember { mutableStateOf("") }
     var showSearch by remember { mutableStateOf(false) }
     var selectedLocation by remember { mutableStateOf<String?>(null) }
-    val filteredParts = remember(state.parts, searchText, selectedLocation) {
+    var selectedManufacturer by remember { mutableStateOf<String?>(null) }
+    val filteredParts = remember(state.parts, searchText, selectedLocation, selectedManufacturer) {
         search(state.parts, searchText).filter { part ->
-            selectedLocation == null || part.location == selectedLocation
+            (selectedLocation == null || part.location == selectedLocation) &&
+            (selectedManufacturer == null || part.manufacturer == selectedManufacturer)
         }
     }
     val cameraPermissionState = rememberPermissionState(
@@ -361,6 +363,13 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
 
     val locations = remember(state.parts) {
         state.parts.map { it.location }
+            .filter { it.isNotBlank() }
+            .distinct()
+            .sorted()
+    }
+
+    val manufacturers = remember(state.parts) {
+        state.parts.map { it.manufacturer }
             .filter { it.isNotBlank() }
             .distinct()
             .sorted()
@@ -675,6 +684,140 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                     }
                 }
 
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        var expanded by remember { mutableStateOf(false) }
+                        ExposedDropdownMenuBox(
+                            expanded = expanded,
+                            onExpandedChange = { expanded = it },
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .height(36.dp)
+                                    .background(
+                                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                                        RoundedCornerShape(18.dp)
+                                    )
+                                    .padding(horizontal = 12.dp)
+                                    .menuAnchor()
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.LocationOn,
+                                    contentDescription = "位置筛选",
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    selectedLocation ?: "全部位置",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Icon(
+                                    imageVector = Icons.Filled.ArrowDropDown,
+                                    contentDescription = "展开",
+                                    modifier = Modifier.size(20.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            ExposedDropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("全部位置") },
+                                    onClick = { 
+                                        selectedLocation = null
+                                        expanded = false 
+                                    }
+                                )
+                                locations.forEach { location ->
+                                    DropdownMenuItem(
+                                        text = { Text(location) },
+                                        onClick = { 
+                                            selectedLocation = location
+                                            expanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        var expanded by remember { mutableStateOf(false) }
+                        ExposedDropdownMenuBox(
+                            expanded = expanded,
+                            onExpandedChange = { expanded = it },
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .height(36.dp)
+                                    .background(
+                                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                                        RoundedCornerShape(18.dp)
+                                    )
+                                    .padding(horizontal = 12.dp)
+                                    .menuAnchor()
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Factory,
+                                    contentDescription = "制造商筛选",
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    selectedManufacturer ?: "全部制造商",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Icon(
+                                    imageVector = Icons.Filled.ArrowDropDown,
+                                    contentDescription = "展开",
+                                    modifier = Modifier.size(20.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            ExposedDropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("全部制造商") },
+                                    onClick = { 
+                                        selectedManufacturer = null
+                                        expanded = false 
+                                    }
+                                )
+                                manufacturers.forEach { manufacturer ->
+                                    DropdownMenuItem(
+                                        text = { Text(manufacturer) },
+                                        onClick = { 
+                                            selectedManufacturer = manufacturer
+                                            expanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
                 PartsList(parts = filteredParts) { part ->
                     Log.d(TAG, "Clicked part ${part}")
                     nav.navigate("edit-part?id=${part.id}")
