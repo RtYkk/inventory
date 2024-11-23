@@ -75,6 +75,9 @@ import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.room.Room
 import coil3.request.crossfade
 import kotlinx.coroutines.GlobalScope
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.DropdownMenuItem
 
 val TAG = "MainActivity";
 
@@ -322,7 +325,12 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
     val scope = rememberCoroutineScope()
     var searchText by remember { mutableStateOf("") }
     var showSearch by remember { mutableStateOf(false) }
-    val filteredParts = search(state.parts, searchText)
+    var selectedLocation by remember { mutableStateOf<String?>(null) }
+    val filteredParts = remember(state.parts, searchText, selectedLocation) {
+        search(state.parts, searchText).filter { part ->
+            selectedLocation == null || part.location == selectedLocation
+        }
+    }
     val cameraPermissionState = rememberPermissionState(
         android.Manifest.permission.CAMERA
     )
@@ -350,6 +358,13 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
             }
         }
     )
+
+    val locations = remember(state.parts) {
+        state.parts.map { it.location }
+            .filter { it.isNotBlank() }
+            .distinct()
+            .sorted()
+    }
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/vnd.sqlite3")
@@ -659,6 +674,7 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                         }
                     }
                 }
+
                 PartsList(parts = filteredParts) { part ->
                     Log.d(TAG, "Clicked part ${part}")
                     nav.navigate("edit-part?id=${part.id}")
@@ -1154,24 +1170,6 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                             }
                         ) {
                             Text("数据手册")
-                        }
-                    }
-                    if (partSupplierUrl.isNotBlank()) {
-                        Button(
-                            modifier = Modifier.padding(8.dp),
-                            onClick = {
-                                try {
-                                    val browserIntent =
-                                        Intent(Intent.ACTION_VIEW, Uri.parse(partSupplierUrl))
-                                    context.startActivity(browserIntent)
-                                } catch (e: Exception) {
-                                    scope.launch {
-                                        snackbarState.showSnackbar("供应商网址无效")
-                                    }
-                                }
-                            }
-                        ) {
-                            Text("访问供应商网站")
                         }
                     }
                 }
