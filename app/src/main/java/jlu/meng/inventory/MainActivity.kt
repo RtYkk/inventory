@@ -327,10 +327,21 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
     var showSearch by remember { mutableStateOf(false) }
     var selectedLocation by remember { mutableStateOf<String?>(null) }
     var selectedManufacturer by remember { mutableStateOf<String?>(null) }
-    val filteredParts = remember(state.parts, searchText, selectedLocation, selectedManufacturer) {
-        search(state.parts, searchText).filter { part ->
-            (selectedLocation == null || part.location == selectedLocation) &&
-            (selectedManufacturer == null || part.manufacturer == selectedManufacturer)
+    var isLoading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        delay(100)
+        isLoading = false
+    }
+
+    val filteredParts = remember(state.parts, searchText, selectedLocation, selectedManufacturer, isLoading) {
+        if (isLoading || state.parts.isEmpty()) {
+            listOf(Part(id = -1, mpn = "加载中...", manufacturer = "", location = "", description = "", num_in_stock = 0))
+        } else {
+            search(state.parts, searchText).filter { part ->
+                (selectedLocation == null || part.location == selectedLocation) &&
+                (selectedManufacturer == null || part.manufacturer == selectedManufacturer)
+            }
         }
     }
     val cameraPermissionState = rememberPermissionState(
@@ -690,10 +701,11 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.wrapContentWidth()
                     ) {
                         var expanded by remember { mutableStateOf(false) }
                         ExposedDropdownMenuBox(
@@ -708,8 +720,7 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                                         RoundedCornerShape(18.dp)
                                     )
                                     .padding(horizontal = 12.dp)
-                                    .menuAnchor()
-                                    .fillMaxWidth(),
+                                    .menuAnchor(),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
@@ -755,8 +766,10 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                         }
                     }
 
+                    Spacer(modifier = Modifier.width(8.dp))
+
                     Box(
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.wrapContentWidth()
                     ) {
                         var expanded by remember { mutableStateOf(false) }
                         ExposedDropdownMenuBox(
@@ -771,8 +784,7 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                                         RoundedCornerShape(18.dp)
                                     )
                                     .padding(horizontal = 12.dp)
-                                    .menuAnchor()
-                                    .fillMaxWidth(),
+                                    .menuAnchor(),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
