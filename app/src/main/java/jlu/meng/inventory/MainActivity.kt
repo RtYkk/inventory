@@ -671,7 +671,7 @@ fun PartsScreen(nav: NavHostController, state: AppViewModel) {
                     ) {
                         Column {
                             Text(
-                                text = state.parts.size.toString(),
+                                text = filteredParts.size.toString(),
                                 fontSize = 36.sp,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier
