@@ -1499,8 +1499,8 @@ fun PartEditorScreen(nav: NavHostController, state: AppViewModel, originalPart: 
                                 }
                             },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            label = { Text("订购数量") },
-                            leadingIcon = { Icon(Icons.Filled.ShoppingCart, null) }
+                            label = { Text("借出数量") },
+                            leadingIcon = { Icon(Icons.Filled.LocalShipping, null) }
                         )
 
                         OutlinedTextField(
